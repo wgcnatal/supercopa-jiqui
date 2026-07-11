@@ -92,9 +92,10 @@ export function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 text-gray-500 hover:text-gray-300 hover:bg-surface-light"
+                className="px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 text-gray-400 hover:text-gold hover:bg-surface-light"
               >
                 <LogIn className="w-4 h-4" />
+                Login
               </Link>
             )}
           </div>
