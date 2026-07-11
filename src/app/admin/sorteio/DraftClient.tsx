@@ -15,7 +15,7 @@ import {
 } from '@/lib/draft-config';
 
 const POT_NAMES = ['POTE 1', 'POTE 2', 'POTE 3', 'POTE 4', 'POTE 5'];
-import { Shuffle, Undo2, ChevronRight, Trophy, AlertTriangle, RotateCcw, Lock } from 'lucide-react';
+import { Shuffle, Undo2, ChevronRight, Trophy, AlertTriangle, RotateCcw, Lock, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
 import Image from 'next/image';
 
 function generateBalancedOrder(teamIds: string[], positionHistory: Record<string, number[]>): string[] {
@@ -37,6 +37,7 @@ export default function DraftClient() {
   const [loading, setLoading] = useState(true);
   const [confirmReset, setConfirmReset] = useState(false);
   const [animatingPick, setAnimatingPick] = useState<string | null>(null);
+  const [showRules, setShowRules] = useState(false);
   const stateRef = useRef(draftState);
 
   useEffect(() => { stateRef.current = draftState; }, [draftState]);
@@ -351,6 +352,53 @@ export default function DraftClient() {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Regras do Sorteio */}
+      <div className="card overflow-hidden">
+        <button
+          onClick={() => setShowRules(!showRules)}
+          className="w-full flex items-center justify-between p-4 hover:bg-surface-light/50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-gold" />
+            <span className="text-sm font-bold text-white">Regras do Sorteio</span>
+          </div>
+          {showRules ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+        </button>
+        {showRules && (
+          <div className="px-4 pb-4 space-y-4 text-sm text-gray-300 border-t border-gray-700/50 pt-4">
+            <div>
+              <h4 className="font-bold text-gold mb-2">Fase 1 - Potes Coringa</h4>
+              <ul className="space-y-1 list-disc list-inside text-gray-400">
+                <li>Existem <span className="text-white font-medium">5 potes</span> com <span className="text-white font-medium">7 jogadores</span> cada</li>
+                <li>Cada equipe escolhe <span className="text-white font-medium">1 jogador de cada pote</span></li>
+                <li>A escolha do pote e livre — nao ha sequencia obrigatoria</li>
+                <li>Apos escolher de um pote, o pote fica bloqueado para aquela equipe</li>
+                <li>Os representantes ja estao pre-atribuidos aos seus times</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-gold mb-2">Fase 2 - Lista Geral</h4>
+              <ul className="space-y-1 list-disc list-inside text-gray-400">
+                <li>Jogadores restantes separados por posicao: <span className="text-white font-medium">GOL, ZAG, LAT, MEI, ATA</span></li>
+                <li>Limite por posicao que cada time deve preencher antes de repetir:</li>
+                <li className="ml-4">Goleiro: <span className="text-white font-medium">1</span> | Zagueiro: <span className="text-white font-medium">1</span> | Lateral: <span className="text-white font-medium">2</span> | Meia: <span className="text-white font-medium">2</span> | Atacante: <span className="text-white font-medium">2</span></li>
+                <li>Uma equipe so pode escolher um 2o jogador de uma posicao apos <span className="text-white font-medium">todas as equipes</span> preencherem aquela posicao</li>
+                <li>Apenas jogadores com status <span className="text-emerald-400 font-medium">PAGO</span> ou <span className="text-cyan-400 font-medium">FREE</span> participam</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-gold mb-2">Ordem do Sorteio</h4>
+              <ul className="space-y-1 list-disc list-inside text-gray-400">
+                <li><span className="text-white font-medium">Rodadas impares:</span> ordem sorteada aleatoriamente com balanceamento</li>
+                <li><span className="text-white font-medium">Rodadas pares:</span> ordem invertida automaticamente (espelho da anterior)</li>
+                <li>Quem ja foi 1o a escolher nao repete ate todos terem sido 1o</li>
+                <li>Isso garante <span className="text-white font-medium">equidade</span> na ordem de escolha entre todas as equipes</li>
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quantitativo */}
