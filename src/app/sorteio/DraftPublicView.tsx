@@ -152,12 +152,13 @@ export default function DraftPublicView() {
   const currentTeamId = currentOrder[draftState.currentTeamIndex];
   const currentTeam = currentTeamId ? getTeamById(currentTeamId) : null;
 
-  // Position counts per team (ALL picks including representatives and pots)
+  // Position counts per team (only representantes + lista geral, NOT potes - potes são coringas)
   const teamPositionCounts: Record<string, Record<string, number>> = {};
   activeTeams.forEach(t => {
     teamPositionCounts[t.id] = { GOL: 0, ZAG: 0, LAT: 0, MEI: 0, ATA: 0 };
   });
   allPicks.forEach(pick => {
+    if (pick.source.startsWith('POTE')) return;
     const player = allPlayers.find(p => p.id === pick.playerId);
     if (player && teamPositionCounts[pick.teamId]?.[player.position] !== undefined) {
       teamPositionCounts[pick.teamId][player.position]++;

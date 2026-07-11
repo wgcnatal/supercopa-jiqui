@@ -193,13 +193,14 @@ export default function DraftClient() {
     }
   });
 
-  // Position counts per team (ALL picks including representatives and pots)
+  // Position counts per team (only representantes + lista geral, NOT potes - potes são coringas)
   const teamPositionCounts: Record<string, Record<string, number>> = {};
   activeTeams.forEach(t => {
     teamPositionCounts[t.id] = { GOL: 0, ZAG: 0, LAT: 0, MEI: 0, ATA: 0 };
   });
-  // Count positions from ALL assigned players (reps, pots, general list)
   allPicks.forEach(pick => {
+    // Pular jogadores dos potes (são coringas, não contam na limitação)
+    if (pick.source.startsWith('POTE')) return;
     const player = allPlayers.find(p => p.id === pick.playerId);
     if (player && teamPositionCounts[pick.teamId]?.[player.position] !== undefined) {
       teamPositionCounts[pick.teamId][player.position]++;
@@ -215,20 +216,6 @@ export default function DraftClient() {
     // ZAG, MEI, ATA: só pode o 2o depois que todos tiverem 1
     // GOL: limite 1, já tratado acima
     if (pos !== 'LAT' && count > 0) {
-      const allTeamsFilled = activeTeams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
-      if (!allTeamsFilled) return false;
-    }
-    return true;
-  }
-
-  // Check if picking a specific player would violate position rules
-  function canPickPlayer(player: Player): boolean {
-    if (!currentTeamId) return false;
-    const pos = player.position;
-    const count = teamPositionCounts[currentTeamId]?.[pos] || 0;
-    const limit = POSITION_LIMITS[pos];
-    if (limit !== undefined && count >= limit) return false;
-    if (pos !== 'LAT' && limit !== undefined && count > 0) {
       const allTeamsFilled = activeTeams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
       if (!allTeamsFilled) return false;
     }
@@ -670,6 +657,7 @@ export default function DraftClient() {
                 <li>Cada equipe escolhe <span className="text-white font-medium">1 jogador de cada pote</span></li>
                 <li>A escolha do pote e livre — nao ha sequencia obrigatoria</li>
                 <li>Apos escolher de um pote, o pote fica bloqueado para aquela equipe</li>
+                <li>Jogadores dos potes sao <span className="text-white font-medium">coringas</span> — sem restricao de posicao</li>
                 <li>Os representantes ja estao pre-atribuidos aos seus times</li>
               </ul>
             </div>
@@ -682,7 +670,8 @@ export default function DraftClient() {
                 <li><span className="text-white font-medium">GOL:</span> cada equipe escolhe apenas 1 goleiro, sem repetir</li>
                 <li><span className="text-white font-medium">ZAG, MEI, ATA:</span> so pode escolher o 2o depois que <span className="text-white font-medium">todas as equipes</span> ja tiverem 1</li>
                 <li><span className="text-white font-medium">LAT:</span> cada equipe pode escolher ate 2 laterais livremente</li>
-                <li>A posicao do <span className="text-white font-medium">representante</span> conta nesse calculo</li>
+                <li>A posicao do <span className="text-white font-medium">representante</span> conta nesse calculo (se nao estiver em pote)</li>
+                <li>Jogadores dos potes sao <span className="text-white font-medium">coringas</span> e nao entram na limitacao de posicao</li>
                 <li>Apenas jogadores com status <span className="text-emerald-400 font-medium">PAGO</span> ou <span className="text-cyan-400 font-medium">FREE</span> participam</li>
               </ul>
             </div>
@@ -833,9 +822,9 @@ export default function DraftClient() {
                           const isPicked = pickedPlayerIds.has(player.id);
                           const pickInfo = allPicks.find(h => h.playerId === player.id);
                           const pickTeam = pickInfo ? getTeamById(pickInfo.teamId) : null;
-                          const positionAllowed = canPickPlayer(player);
-                          const canPick = !isPicked && !alreadyPickedFromPot && !allPicked && !!currentTeamId && positionAllowed;
-                          const blockedByPosition = !isPicked && !alreadyPickedFromPot && !allPicked && !!currentTeamId && !positionAllowed;
+                          // Potes são coringas - sem restrição de posição
+                          const canPick = !isPicked && !alreadyPickedFromPot && !allPicked && !!currentTeamId;
+                          const blockedByPosition = false;
 
                           return (
                             <div key={player.id} className="flex items-center gap-2">
