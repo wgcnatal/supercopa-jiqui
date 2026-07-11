@@ -221,6 +221,20 @@ export default function DraftClient() {
     return true;
   }
 
+  // Check if picking a specific player would violate position rules
+  function canPickPlayer(player: Player): boolean {
+    if (!currentTeamId) return false;
+    const pos = player.position;
+    const count = teamPositionCounts[currentTeamId]?.[pos] || 0;
+    const limit = POSITION_LIMITS[pos];
+    if (limit !== undefined && count >= limit) return false;
+    if (pos !== 'LAT' && limit !== undefined && count > 0) {
+      const allTeamsFilled = activeTeams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
+      if (!allTeamsFilled) return false;
+    }
+    return true;
+  }
+
   const allPlayersAssigned = phase1Complete && generalListPlayers.length === 0;
 
   // Stats: eligible players
@@ -819,7 +833,9 @@ export default function DraftClient() {
                           const isPicked = pickedPlayerIds.has(player.id);
                           const pickInfo = allPicks.find(h => h.playerId === player.id);
                           const pickTeam = pickInfo ? getTeamById(pickInfo.teamId) : null;
-                          const canPick = !isPicked && !alreadyPickedFromPot && !allPicked && !!currentTeamId;
+                          const positionAllowed = canPickPlayer(player);
+                          const canPick = !isPicked && !alreadyPickedFromPot && !allPicked && !!currentTeamId && positionAllowed;
+                          const blockedByPosition = !isPicked && !alreadyPickedFromPot && !allPicked && !!currentTeamId && !positionAllowed;
 
                           return (
                             <div key={player.id} className="flex items-center gap-2">
@@ -849,8 +865,18 @@ export default function DraftClient() {
                                         : 'border-gray-700 bg-surface-dark cursor-not-allowed opacity-40'
                                   }`}
                                 >
-                                  <p className="font-bold text-white text-sm">{player.nickname}</p>
-                                  <p className="text-gray-500 text-xs">{player.full_name}</p>
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="font-bold text-white text-sm">{player.nickname || player.full_name}</p>
+                                      <p className="text-gray-500 text-xs">{player.full_name}</p>
+                                    </div>
+                                    {blockedByPosition && (
+                                      <span className="flex items-center gap-1 text-xs text-red-400 bg-red-900/30 px-1.5 py-0.5 rounded">
+                                        <AlertTriangle className="w-3 h-3" />
+                                        {player.position}
+                                      </span>
+                                    )}
+                                  </div>
                                 </button>
                               )}
                             </div>
@@ -874,26 +900,24 @@ export default function DraftClient() {
               {(Object.keys(playersByPosition) as Position[]).map(pos => {
                 const players = playersByPosition[pos];
                 if (players.length === 0) return null;
-                const posAvailable = draftState.phase === 2 ? canPickPosition(pos) : true;
+                const posAvailable = canPickPosition(pos);
                 return (
                   <div key={pos} className="card p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-lg font-bold text-white">
                         {POSITION_LABELS[pos]} ({pos}) - {players.length} disponiveis
                       </h3>
-                      {draftState.phase === 2 && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-400">
-                            Limite: {POSITION_LIMITS[pos]} por time
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400">
+                          Limite: {POSITION_LIMITS[pos]} por time
+                        </span>
+                        {!posAvailable && currentTeamId && (
+                          <span className="flex items-center gap-1 text-xs bg-red-900/50 text-red-400 px-2 py-0.5 rounded">
+                            <AlertTriangle className="w-3 h-3" />
+                            Bloqueado
                           </span>
-                          {!posAvailable && currentTeamId && (
-                            <span className="flex items-center gap-1 text-xs bg-red-900/50 text-red-400 px-2 py-0.5 rounded">
-                              <AlertTriangle className="w-3 h-3" />
-                              Bloqueado
-                            </span>
                           )}
                         </div>
-                      )}
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                       {players.map(player => (
