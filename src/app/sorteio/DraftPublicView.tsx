@@ -10,10 +10,8 @@ import {
   DraftState,
   DraftPick,
   INITIAL_DRAFT_STATE,
-  PRE_ASSIGNED,
+  POT_NAMES,
 } from '@/lib/draft-config';
-
-const POT_NAMES = ['POTE 1', 'POTE 2', 'POTE 3', 'POTE 4', 'POTE 5'];
 import { Trophy, ChevronRight, Users, Clock } from 'lucide-react';
 import Image from 'next/image';
 
@@ -110,21 +108,28 @@ export default function DraftPublicView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Build pre-assigned picks from representatives
+  // Active teams from config
+  const activeTeamIds = draftState.config?.activeTeamIds || [];
+  const activeTeams = activeTeamIds.length > 0 ? teams.filter(t => activeTeamIds.includes(t.id)) : teams;
+  const numTeams = activeTeams.length;
+
+  // Build pre-assigned picks from config representatives
   const preAssignedPicks: DraftPick[] = [];
-  PRE_ASSIGNED.forEach(pa => {
-    const player = allPlayers.find(p => p.id === pa.playerId);
-    if (player && player.team_id) {
-      preAssignedPicks.push({
-        round: 0,
-        teamId: player.team_id,
-        playerId: pa.playerId,
-        playerNickname: pa.nickname,
-        source: pa.source,
-        timestamp: 0,
-      });
-    }
-  });
+  if (draftState.phase !== 0 && draftState.config?.representatives) {
+    Object.entries(draftState.config.representatives).forEach(([teamId, playerId]) => {
+      const player = allPlayers.find(p => p.id === playerId);
+      if (player) {
+        preAssignedPicks.push({
+          round: 0,
+          teamId,
+          playerId,
+          playerNickname: player.nickname || player.full_name,
+          source: player.pot || 'REPRESENTANTE',
+          timestamp: 0,
+        });
+      }
+    });
+  }
 
   // Build dynamic pots
   const dynamicPots = POT_NAMES.map(potName => ({
@@ -137,7 +142,7 @@ export default function DraftPublicView() {
   const pickedPlayerIds = new Set(allPicks.map(p => p.playerId));
 
   const teamRosters: Record<string, DraftPick[]> = {};
-  teams.forEach(t => { teamRosters[t.id] = []; });
+  activeTeams.forEach(t => { teamRosters[t.id] = []; });
   allPicks.forEach(pick => {
     if (!teamRosters[pick.teamId]) teamRosters[pick.teamId] = [];
     teamRosters[pick.teamId].push(pick);
@@ -149,11 +154,11 @@ export default function DraftPublicView() {
 
   // Position counts for phase 2
   const teamPositionCounts: Record<string, Record<string, number>> = {};
-  teams.forEach(t => {
+  activeTeams.forEach(t => {
     teamPositionCounts[t.id] = { GOL: 0, ZAG: 0, LAT: 0, MEI: 0, ATA: 0 };
   });
   draftState.pickHistory.forEach(pick => {
-    if (!pick.source.startsWith('POTE')) {
+    if (!pick.source.startsWith('POTE') && pick.source !== 'REPRESENTANTE') {
       const pos = pick.source as Position;
       if (teamPositionCounts[pick.teamId]?.[pos] !== undefined) {
         teamPositionCounts[pick.teamId][pos]++;
@@ -187,7 +192,7 @@ export default function DraftPublicView() {
 
   const allDone = draftState.isFinished || (
     draftState.phase === 2 && generalListPlayers.length === 0 &&
-    draftState.pickHistory.filter(p => p.source.startsWith('POTE')).length >= dynamicPots.filter(p => p.players.length > 0).length * 7
+    allPicks.filter(p => p.source.startsWith('POTE')).length >= dynamicPots.filter(p => p.players.length > 0).length * numTeams
   );
 
   return (
@@ -390,7 +395,7 @@ export default function DraftPublicView() {
           Elencos dos Times
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {teams.map(team => {
+          {activeTeams.map(team => {
             const roster = teamRosters[team.id] || [];
             const isActive = team.id === currentTeamId && !draftState.needsNewOrder;
             return (

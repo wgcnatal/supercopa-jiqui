@@ -6,16 +6,30 @@ import { Team, Player, Position } from '@/lib/types';
 import {
   POSITION_LIMITS,
   POSITION_LABELS,
-  NUM_TEAMS,
   DraftState,
   DraftPick,
+  DraftConfig,
   INITIAL_DRAFT_STATE,
   DRAFT_STORAGE_KEY,
-  PRE_ASSIGNED,
+  POT_NAMES,
 } from '@/lib/draft-config';
 
-const POT_NAMES = ['POTE 1', 'POTE 2', 'POTE 3', 'POTE 4', 'POTE 5'];
-import { Shuffle, Undo2, ChevronRight, Trophy, AlertTriangle, RotateCcw, Lock, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Shuffle,
+  Undo2,
+  ChevronRight,
+  Trophy,
+  AlertTriangle,
+  RotateCcw,
+  Lock,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Settings,
+  ArrowLeft,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 import Image from 'next/image';
 
 function generateBalancedOrder(teamIds: string[], positionHistory: Record<string, number[]>): string[] {
@@ -38,8 +52,12 @@ export default function DraftClient() {
   const [confirmReset, setConfirmReset] = useState(false);
   const [animatingPick, setAnimatingPick] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
-  const stateRef = useRef(draftState);
 
+  // Phase 0 config local state
+  const [configActiveTeamIds, setConfigActiveTeamIds] = useState<string[]>([]);
+  const [configRepresentatives, setConfigRepresentatives] = useState<Record<string, string>>({});
+
+  const stateRef = useRef(draftState);
   useEffect(() => { stateRef.current = draftState; }, [draftState]);
 
   // Save to localStorage
@@ -56,15 +74,45 @@ export default function DraftClient() {
         supabase.from('teams').select('*').order('name'),
         supabase.from('players').select('*').order('full_name'),
       ]);
-      setTeams(teamsData || []);
-      setAllPlayers(playersData || []);
+      const loadedTeams = teamsData || [];
+      const loadedPlayers = playersData || [];
+      setTeams(loadedTeams);
+      setAllPlayers(loadedPlayers);
 
       const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (saved) {
         try {
-          setDraftState(JSON.parse(saved) as DraftState);
+          const parsed = JSON.parse(saved) as DraftState;
+          setDraftState(parsed);
+
+          // If we're in config phase, initialize config local state from saved or defaults
+          if (parsed.phase === 0) {
+            if (parsed.config.activeTeamIds.length > 0) {
+              setConfigActiveTeamIds(parsed.config.activeTeamIds);
+              setConfigRepresentatives(parsed.config.representatives);
+            } else {
+              setConfigActiveTeamIds(loadedTeams.map(t => t.id));
+              // Pre-fill representatives: find players whose team_id matches each team
+              const reps: Record<string, string> = {};
+              loadedTeams.forEach(team => {
+                const rep = loadedPlayers.find(p => p.team_id === team.id);
+                if (rep) reps[team.id] = rep.id;
+              });
+              setConfigRepresentatives(reps);
+            }
+          }
         } catch { /* ignore */ }
+      } else {
+        // No saved state - initialize config defaults
+        setConfigActiveTeamIds(loadedTeams.map(t => t.id));
+        const reps: Record<string, string> = {};
+        loadedTeams.forEach(team => {
+          const rep = loadedPlayers.find(p => p.team_id === team.id);
+          if (rep) reps[team.id] = rep.id;
+        });
+        setConfigRepresentatives(reps);
       }
+
       setLoading(false);
     }
     load();
@@ -73,6 +121,11 @@ export default function DraftClient() {
 
   const getTeamById = useCallback((id: string) => teams.find(t => t.id === id), [teams]);
 
+  // Active teams based on config
+  const activeTeamIds = draftState.config.activeTeamIds;
+  const activeTeams = teams.filter(t => activeTeamIds.includes(t.id));
+  const numTeams = activeTeamIds.length;
+
   // Build dynamic pots from player.pot field
   const dynamicPots = POT_NAMES.map(potName => ({
     name: potName,
@@ -80,28 +133,31 @@ export default function DraftClient() {
   }));
   const potPlayerIds = new Set(allPlayers.filter(p => p.pot).map(p => p.id));
 
-  // Build pre-assigned picks from representatives
+  // Build pre-assigned picks from config representatives
   const preAssignedPicks: DraftPick[] = [];
-  PRE_ASSIGNED.forEach(pa => {
-    const player = allPlayers.find(p => p.id === pa.playerId);
-    if (player && player.team_id) {
-      preAssignedPicks.push({
-        round: 0,
-        teamId: player.team_id,
-        playerId: pa.playerId,
-        playerNickname: pa.nickname,
-        source: pa.source,
-        timestamp: 0,
-      });
-    }
-  });
+  if (draftState.phase !== 0) {
+    Object.entries(draftState.config.representatives).forEach(([teamId, playerId]) => {
+      const player = allPlayers.find(p => p.id === playerId);
+      if (player) {
+        const source = player.pot || 'REPRESENTANTE';
+        preAssignedPicks.push({
+          round: 0,
+          teamId,
+          playerId,
+          playerNickname: player.nickname || player.full_name,
+          source,
+          timestamp: 0,
+        });
+      }
+    });
+  }
 
   // Derived state - combine pre-assigned + draft picks
   const allPicks = [...preAssignedPicks, ...draftState.pickHistory];
   const pickedPlayerIds = new Set(allPicks.map(p => p.playerId));
 
   const teamRosters: Record<string, DraftPick[]> = {};
-  teams.forEach(t => { teamRosters[t.id] = []; });
+  activeTeams.forEach(t => { teamRosters[t.id] = []; });
   allPicks.forEach(pick => {
     if (!teamRosters[pick.teamId]) teamRosters[pick.teamId] = [];
     teamRosters[pick.teamId].push(pick);
@@ -118,10 +174,10 @@ export default function DraftClient() {
       .map(p => p.source)
   );
 
-  // Phase 1 complete when all teams picked from all pots
+  // Phase 1 complete when all active teams picked from all pots
   const totalPotPicks = allPicks.filter(p => p.source.startsWith('POTE')).length;
   const activePots = dynamicPots.filter(pot => pot.players.length > 0);
-  const phase1Complete = totalPotPicks >= activePots.length * NUM_TEAMS;
+  const phase1Complete = numTeams > 0 && totalPotPicks >= activePots.length * numTeams;
 
   // Phase 2: general list
   const generalListPlayers = allPlayers.filter(
@@ -139,11 +195,11 @@ export default function DraftClient() {
 
   // Position counts per team (phase 2 picks only)
   const teamPositionCounts: Record<string, Record<string, number>> = {};
-  teams.forEach(t => {
+  activeTeams.forEach(t => {
     teamPositionCounts[t.id] = { GOL: 0, ZAG: 0, LAT: 0, MEI: 0, ATA: 0 };
   });
   draftState.pickHistory.forEach(pick => {
-    if (!pick.source.startsWith('POTE')) {
+    if (!pick.source.startsWith('POTE') && pick.source !== 'REPRESENTANTE') {
       const pos = pick.source as Position;
       if (teamPositionCounts[pick.teamId]?.[pos] !== undefined) {
         teamPositionCounts[pick.teamId][pos]++;
@@ -157,7 +213,7 @@ export default function DraftClient() {
     const limit = POSITION_LIMITS[pos];
     if (count >= limit) return false;
     if (count > 0) {
-      const allTeamsFilled = teams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
+      const allTeamsFilled = activeTeams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
       if (!allTeamsFilled) return false;
     }
     return true;
@@ -167,7 +223,6 @@ export default function DraftClient() {
 
   // Stats: eligible players
   const eligiblePlayers = allPlayers.filter(p => p.payment === 'PAGO' || p.payment === 'FREE');
-  // potPlayersCount used below in stats
   const totalEligible = eligiblePlayers.length;
   const totalPicked = allPicks.length;
   const totalRemaining = generalListPlayers.length;
@@ -175,7 +230,7 @@ export default function DraftClient() {
 
   // Generate round order
   function generateOrder() {
-    const teamIds = teams.map(t => t.id);
+    const teamIds = activeTeamIds;
     const roundNum = draftState.currentRound;
     const isEven = roundNum % 2 === 0;
 
@@ -232,15 +287,13 @@ export default function DraftClient() {
         let nextPhase = prev.phase;
         let needsNewOrder = false;
 
-        if (nextTeamIndex >= NUM_TEAMS) {
-          // All teams picked in this round
+        if (nextTeamIndex >= numTeams) {
           nextTeamIndex = 0;
           nextRound = prev.currentRound + 1;
           needsNewOrder = true;
 
-          // Check if phase 1 is complete (include pre-assigned)
           const potPicks = [...preAssignedPicks, ...newHistory].filter(p => p.source.startsWith('POTE')).length;
-          if (prev.phase === 1 && potPicks >= activePots.length * NUM_TEAMS) {
+          if (prev.phase === 1 && potPicks >= activePots.length * numTeams) {
             nextPhase = 2;
           }
         }
@@ -250,7 +303,7 @@ export default function DraftClient() {
           pickHistory: newHistory,
           currentTeamIndex: nextTeamIndex,
           currentRound: nextRound,
-          phase: nextPhase,
+          phase: nextPhase as 0 | 1 | 2,
           needsNewOrder,
         };
       });
@@ -272,16 +325,14 @@ export default function DraftClient() {
       if (prevTeamIndex >= 0) {
         return { ...prev, pickHistory: newHistory, currentTeamIndex: prevTeamIndex, needsNewOrder: false };
       } else {
-        // Go back to end of previous round
         const prevRound = prev.currentRound - 1;
         if (prevRound >= 1) {
-          // Check if we need to go back to phase 1
           const potPicks = [...preAssignedPicks, ...newHistory].filter(p => p.source.startsWith('POTE')).length;
-          const wasPhase1 = potPicks < activePots.length * NUM_TEAMS;
+          const wasPhase1 = potPicks < activePots.length * numTeams;
           return {
             ...prev,
             pickHistory: newHistory,
-            currentTeamIndex: NUM_TEAMS - 1,
+            currentTeamIndex: numTeams - 1,
             currentRound: prevRound,
             phase: wasPhase1 ? 1 : prev.phase,
             needsNewOrder: false,
@@ -292,7 +343,7 @@ export default function DraftClient() {
     });
   }
 
-  // Reset draft
+  // Reset draft - go back to phase 0
   async function resetDraft() {
     const pickedIds = draftState.pickHistory.map(p => p.playerId);
     if (pickedIds.length > 0) {
@@ -300,10 +351,63 @@ export default function DraftClient() {
         await supabase.from('players').update({ team_id: null }).eq('id', pid);
       }
     }
-    // Keep representatives assigned
     localStorage.removeItem(DRAFT_STORAGE_KEY);
     setDraftState(INITIAL_DRAFT_STATE);
+    // Reset config local state to defaults
+    setConfigActiveTeamIds(teams.map(t => t.id));
+    const reps: Record<string, string> = {};
+    teams.forEach(team => {
+      const rep = allPlayers.find(p => p.team_id === team.id);
+      if (rep) reps[team.id] = rep.id;
+    });
+    setConfigRepresentatives(reps);
     setConfirmReset(false);
+  }
+
+  // Phase 0: Start draft with config
+  function startDraft() {
+    const config: DraftConfig = {
+      activeTeamIds: configActiveTeamIds,
+      representatives: Object.fromEntries(
+        Object.entries(configRepresentatives).filter(([teamId]) => configActiveTeamIds.includes(teamId))
+      ),
+    };
+
+    setDraftState(prev => ({
+      ...prev,
+      phase: 1,
+      config,
+    }));
+  }
+
+  // Go back to config (only if no picks made)
+  function goBackToConfig() {
+    setDraftState(prev => ({
+      ...prev,
+      phase: 0,
+      isStarted: false,
+      needsNewOrder: true,
+      roundOrders: [],
+      positionHistory: {},
+      currentRound: 1,
+      currentTeamIndex: 0,
+    }));
+    // Restore config local state from current config
+    setConfigActiveTeamIds(draftState.config.activeTeamIds.length > 0 ? draftState.config.activeTeamIds : teams.map(t => t.id));
+    setConfigRepresentatives(draftState.config.representatives);
+  }
+
+  // Config validation
+  const configValid = configActiveTeamIds.length >= 6
+    && configActiveTeamIds.every(teamId => !!configRepresentatives[teamId]);
+
+  // Toggle team in config
+  function toggleTeam(teamId: string) {
+    setConfigActiveTeamIds(prev =>
+      prev.includes(teamId)
+        ? prev.filter(id => id !== teamId)
+        : [...prev, teamId]
+    );
   }
 
   if (loading) {
@@ -314,6 +418,171 @@ export default function DraftClient() {
     );
   }
 
+  // =====================
+  // PHASE 0 - CONFIG
+  // =====================
+  if (draftState.phase === 0) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Settings className="w-6 h-6 text-gold" />
+              Configuracao do Sorteio
+            </h2>
+            <p className="text-gray-400 text-sm mt-1">
+              Selecione as equipes participantes e seus representantes
+            </p>
+          </div>
+        </div>
+
+        {/* Team Selection */}
+        <div className="card p-4">
+          <h3 className="text-lg font-bold text-white mb-1">Equipes Participantes</h3>
+          <p className="text-sm text-gray-400 mb-4">
+            Selecione pelo menos 6 equipes. ({configActiveTeamIds.length} de {teams.length} selecionadas)
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {teams.map(team => {
+              const isChecked = configActiveTeamIds.includes(team.id);
+              return (
+                <button
+                  key={team.id}
+                  onClick={() => toggleTeam(team.id)}
+                  className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 text-left ${
+                    isChecked
+                      ? 'border-gold/60 bg-gold/10'
+                      : 'border-gray-700 bg-surface-dark opacity-60 hover:opacity-80'
+                  }`}
+                >
+                  <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isChecked ? 'border-gold bg-gold' : 'border-gray-500 bg-transparent'
+                  }`}>
+                    {isChecked && <CheckCircle2 className="w-4 h-4 text-black" />}
+                  </div>
+                  {team.logo_url ? (
+                    <Image src={team.logo_url} alt={team.name} width={32} height={32} className="w-8 h-8 object-contain" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full flex-shrink-0" style={{ backgroundColor: team.color }} />
+                  )}
+                  <span className="font-bold text-white text-sm">{team.name}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {configActiveTeamIds.length < 6 && (
+            <div className="flex items-center gap-2 mt-3 text-sm text-red-400">
+              <XCircle className="w-4 h-4" />
+              Selecione pelo menos 6 equipes para iniciar o sorteio
+            </div>
+          )}
+        </div>
+
+        {/* Representative Selection */}
+        <div className="card p-4">
+          <h3 className="text-lg font-bold text-white mb-1">Representantes</h3>
+          <p className="text-sm text-gray-400 mb-4">
+            Selecione o jogador representante de cada equipe ativa
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {teams
+              .filter(team => configActiveTeamIds.includes(team.id))
+              .map(team => {
+                const selectedPlayerId = configRepresentatives[team.id] || '';
+                const selectedPlayer = allPlayers.find(p => p.id === selectedPlayerId);
+
+                return (
+                  <div key={team.id} className="p-3 rounded-lg border border-gray-700 bg-surface-dark">
+                    <div className="flex items-center gap-2 mb-2">
+                      {team.logo_url ? (
+                        <Image src={team.logo_url} alt={team.name} width={24} height={24} className="w-6 h-6 object-contain" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: team.color }} />
+                      )}
+                      <span className="font-bold text-white text-sm">{team.name}</span>
+                      {selectedPlayer && (
+                        <span className="text-xs text-gold ml-auto">
+                          {selectedPlayer.nickname || selectedPlayer.full_name}
+                        </span>
+                      )}
+                    </div>
+                    <select
+                      value={selectedPlayerId}
+                      onChange={(e) => {
+                        setConfigRepresentatives(prev => ({
+                          ...prev,
+                          [team.id]: e.target.value,
+                        }));
+                      }}
+                      className="w-full bg-surface text-white text-sm rounded-lg border border-gray-600 px-3 py-2 focus:border-gold focus:outline-none"
+                    >
+                      <option value="">-- Selecionar representante --</option>
+                      {allPlayers
+                        .filter(p => p.payment === 'PAGO' || p.payment === 'FREE')
+                        .map(player => (
+                          <option key={player.id} value={player.id}>
+                            {player.full_name}
+                            {player.nickname ? ` (${player.nickname})` : ''}
+                            {player.pot ? ` - ${player.pot}` : ''}
+                          </option>
+                        ))}
+                    </select>
+                    {!selectedPlayerId && (
+                      <p className="text-xs text-red-400 mt-1">Representante obrigatorio</p>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+
+        {/* Start Button */}
+        <div className="flex justify-center">
+          <button
+            onClick={startDraft}
+            disabled={!configValid}
+            className={`text-lg font-bold px-10 py-4 rounded-xl transition-all duration-300 flex items-center gap-3 ${
+              configValid
+                ? 'bg-gold text-black hover:bg-gold/90 shadow-lg shadow-gold/30 hover:shadow-gold/50 hover:scale-105'
+                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <Trophy className="w-6 h-6" />
+            Iniciar Sorteio
+          </button>
+        </div>
+
+        {/* Summary */}
+        <div className="card p-4">
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Resumo da Configuracao</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+            <div>
+              <p className="text-gray-500">Equipes</p>
+              <p className="text-white font-bold">{configActiveTeamIds.length}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Representantes definidos</p>
+              <p className="text-white font-bold">
+                {configActiveTeamIds.filter(tid => !!configRepresentatives[tid]).length} / {configActiveTeamIds.length}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Potes ativos</p>
+              <p className="text-white font-bold">{activePots.length}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =====================
+  // PHASE 1 & 2 - DRAFT
+  // =====================
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -327,9 +596,19 @@ export default function DraftClient() {
             {draftState.phase === 1 ? 'Fase 1 - Potes Coringa' : 'Fase 2 - Lista Geral'}
             {' | '}Rodada {draftState.currentRound}
             {' | '}{draftState.pickHistory.length} escolhas realizadas
+            {' | '}{numTeams} equipes
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {draftState.pickHistory.length === 0 && (
+            <button
+              onClick={goBackToConfig}
+              className="btn-outline text-sm flex items-center gap-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar Config
+            </button>
+          )}
           <button
             onClick={undoLastPick}
             disabled={draftState.pickHistory.length === 0}
@@ -371,7 +650,7 @@ export default function DraftClient() {
             <div>
               <h4 className="font-bold text-gold mb-2">Fase 1 - Potes Coringa</h4>
               <ul className="space-y-1 list-disc list-inside text-gray-400">
-                <li>Existem <span className="text-white font-medium">5 potes</span> com <span className="text-white font-medium">7 jogadores</span> cada</li>
+                <li>Existem <span className="text-white font-medium">{activePots.length} potes</span> com jogadores selecionados</li>
                 <li>Cada equipe escolhe <span className="text-white font-medium">1 jogador de cada pote</span></li>
                 <li>A escolha do pote e livre — nao ha sequencia obrigatoria</li>
                 <li>Apos escolher de um pote, o pote fica bloqueado para aquela equipe</li>
@@ -642,7 +921,7 @@ export default function DraftClient() {
       <div className="card p-4">
         <h3 className="text-lg font-bold text-white mb-4">Elencos</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {teams.map(team => {
+          {activeTeams.map(team => {
             const roster = teamRosters[team.id] || [];
             const isActive = team.id === currentTeamId;
             const posCounts = teamPositionCounts[team.id] || {};
