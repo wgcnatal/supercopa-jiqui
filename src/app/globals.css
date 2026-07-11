@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0f0f1a;
+  --foreground: #e5e7eb;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-gray-700;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-white font-bold;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-card border border-gray-700/50 rounded-xl shadow-lg;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-gold/30 hover:shadow-gold/5;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-light text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  .btn-gold {
+    @apply bg-gold hover:bg-gold-light text-black font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  .btn-outline {
+    @apply border border-gray-600 hover:border-gold text-gray-300 hover:text-gold font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  .input-field {
+    @apply w-full bg-surface border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors;
+  }
+
+  .select-field {
+    @apply w-full bg-surface border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-scheduled {
+    @apply badge bg-gray-700 text-gray-300;
+  }
+
+  .badge-live {
+    @apply badge bg-red-900/50 text-red-400 animate-pulse;
+  }
+
+  .badge-finished {
+    @apply badge bg-primary/20 text-primary-light;
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold text-white mb-6;
+  }
+
+  .gold-gradient {
+    @apply bg-gradient-to-r from-gold-dark via-gold to-gold-light bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #065f46 #1a1a2e;
+  }
+}
