@@ -152,17 +152,15 @@ export default function DraftPublicView() {
   const currentTeamId = currentOrder[draftState.currentTeamIndex];
   const currentTeam = currentTeamId ? getTeamById(currentTeamId) : null;
 
-  // Position counts for phase 2
+  // Position counts per team (ALL picks including representatives and pots)
   const teamPositionCounts: Record<string, Record<string, number>> = {};
   activeTeams.forEach(t => {
     teamPositionCounts[t.id] = { GOL: 0, ZAG: 0, LAT: 0, MEI: 0, ATA: 0 };
   });
-  draftState.pickHistory.forEach(pick => {
-    if (!pick.source.startsWith('POTE') && pick.source !== 'REPRESENTANTE') {
-      const pos = pick.source as Position;
-      if (teamPositionCounts[pick.teamId]?.[pos] !== undefined) {
-        teamPositionCounts[pick.teamId][pos]++;
-      }
+  allPicks.forEach(pick => {
+    const player = allPlayers.find(p => p.id === pick.playerId);
+    if (player && teamPositionCounts[pick.teamId]?.[player.position] !== undefined) {
+      teamPositionCounts[pick.teamId][player.position]++;
     }
   });
 

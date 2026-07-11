@@ -193,17 +193,16 @@ export default function DraftClient() {
     }
   });
 
-  // Position counts per team (phase 2 picks only)
+  // Position counts per team (ALL picks including representatives and pots)
   const teamPositionCounts: Record<string, Record<string, number>> = {};
   activeTeams.forEach(t => {
     teamPositionCounts[t.id] = { GOL: 0, ZAG: 0, LAT: 0, MEI: 0, ATA: 0 };
   });
-  draftState.pickHistory.forEach(pick => {
-    if (!pick.source.startsWith('POTE') && pick.source !== 'REPRESENTANTE') {
-      const pos = pick.source as Position;
-      if (teamPositionCounts[pick.teamId]?.[pos] !== undefined) {
-        teamPositionCounts[pick.teamId][pos]++;
-      }
+  // Count positions from ALL assigned players (reps, pots, general list)
+  allPicks.forEach(pick => {
+    const player = allPlayers.find(p => p.id === pick.playerId);
+    if (player && teamPositionCounts[pick.teamId]?.[player.position] !== undefined) {
+      teamPositionCounts[pick.teamId][player.position]++;
     }
   });
 
@@ -212,7 +211,10 @@ export default function DraftClient() {
     const count = teamPositionCounts[currentTeamId]?.[pos] || 0;
     const limit = POSITION_LIMITS[pos];
     if (count >= limit) return false;
-    if (count > 0) {
+    // LAT: livre ate o limite (sem restrição de esperar)
+    // ZAG, MEI, ATA: só pode o 2o depois que todos tiverem 1
+    // GOL: limite 1, já tratado acima
+    if (pos !== 'LAT' && count > 0) {
       const allTeamsFilled = activeTeams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
       if (!allTeamsFilled) return false;
     }
@@ -661,9 +663,12 @@ export default function DraftClient() {
               <h4 className="font-bold text-gold mb-2">Fase 2 - Lista Geral</h4>
               <ul className="space-y-1 list-disc list-inside text-gray-400">
                 <li>Jogadores restantes separados por posicao: <span className="text-white font-medium">GOL, ZAG, LAT, MEI, ATA</span></li>
-                <li>Limite por posicao que cada time deve preencher antes de repetir:</li>
-                <li className="ml-4">Goleiro: <span className="text-white font-medium">1</span> | Zagueiro: <span className="text-white font-medium">1</span> | Lateral: <span className="text-white font-medium">2</span> | Meia: <span className="text-white font-medium">2</span> | Atacante: <span className="text-white font-medium">2</span></li>
-                <li>Uma equipe so pode escolher um 2o jogador de uma posicao apos <span className="text-white font-medium">todas as equipes</span> preencherem aquela posicao</li>
+                <li>Limite maximo por posicao por equipe:</li>
+                <li className="ml-4">Goleiro: <span className="text-white font-medium">1</span> | Zagueiro: <span className="text-white font-medium">2</span> | Lateral: <span className="text-white font-medium">2</span> | Meia: <span className="text-white font-medium">2</span> | Atacante: <span className="text-white font-medium">2</span></li>
+                <li><span className="text-white font-medium">GOL:</span> cada equipe escolhe apenas 1 goleiro, sem repetir</li>
+                <li><span className="text-white font-medium">ZAG, MEI, ATA:</span> so pode escolher o 2o depois que <span className="text-white font-medium">todas as equipes</span> ja tiverem 1</li>
+                <li><span className="text-white font-medium">LAT:</span> cada equipe pode escolher ate 2 laterais livremente</li>
+                <li>A posicao do <span className="text-white font-medium">representante</span> conta nesse calculo</li>
                 <li>Apenas jogadores com status <span className="text-emerald-400 font-medium">PAGO</span> ou <span className="text-cyan-400 font-medium">FREE</span> participam</li>
               </ul>
             </div>

@@ -14,7 +14,7 @@ export interface Pot {
 // Position limits per team
 export const POSITION_LIMITS: Record<string, number> = {
   GOL: 1,
-  ZAG: 1,
+  ZAG: 2,
   LAT: 2,
   MEI: 2,
   ATA: 2,
