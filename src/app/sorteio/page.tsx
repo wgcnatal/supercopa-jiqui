@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Team, Player } from '@/lib/types';
-import { POSITION_LABELS, POT_NAMES } from '@/lib/draft-config';
-import { Trophy, Users, ChevronRight } from 'lucide-react';
+import { POT_NAMES } from '@/lib/draft-config';
+import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 
 export const revalidate = 60;
@@ -75,9 +75,6 @@ export default async function SorteioPage() {
           {allTeams.map(team => {
             const roster = teamRosters[team.id] || [];
             // Separate pot players and regular players
-            const potRoster = roster.filter(p => p.pot);
-            const regularRoster = roster.filter(p => !p.pot);
-
             return (
               <div key={team.id} className="card p-4">
                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-700/50">
