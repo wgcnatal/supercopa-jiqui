@@ -7,12 +7,12 @@ import { Menu, X, Trophy, Shield, LogIn, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const publicLinks = [
-  { href: '/', label: 'Inicio' },
-  { href: '/classificacao', label: 'Classificacao' },
+  { href: '/', label: 'Início' },
+  { href: '/classificacao', label: 'Classificação' },
   { href: '/jogos', label: 'Jogos' },
   { href: '/times', label: 'Times' },
   { href: '/sorteio', label: 'Sorteio' },
-  { href: '/estatisticas', label: 'Estatisticas' },
+  { href: '/estatisticas', label: 'Estatísticas' },
 ];
 
 const adminLinks = [

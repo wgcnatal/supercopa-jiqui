@@ -9,11 +9,11 @@ import Image from 'next/image';
 const sponsors = [
   { name: 'Ortobom Midway', logo: '/sponsors/ortobom-midway.jpg' },
   { name: 'Consorcio Embracon', logo: '/sponsors/embracon.jpg' },
-  { name: 'Super Locacao e Construcao', logo: '/sponsors/super-locacao.jpg' },
+  { name: 'Super Locação e Construção', logo: '/sponsors/super-locacao.jpg' },
   { name: 'Piraque', logo: '/sponsors/piraque.jpg' },
   { name: 'Super Limp', logo: '/sponsors/super-limp.jpg' },
   { name: 'Autoescola Via Certa', logo: '/sponsors/via-certa.jpg' },
-  { name: 'Cabeca Auto Center', logo: '/sponsors/cabeca-auto-center.jpg' },
+  { name: 'Cabeça Auto Center', logo: '/sponsors/cabeca-auto-center.jpg' },
   { name: 'WEB-TV Prof. Luis Carlos Noronha', logo: '/sponsors/luiscarlos-noronha.jpg' },
 ];
 
@@ -57,12 +57,12 @@ export default async function HomePage() {
           </h1>
           <p className="text-xl md:text-2xl text-gold font-bold mb-2">2026</p>
           <p className="text-gray-400 text-lg max-w-xl mx-auto">
-            6 times, 1 campeao. Acompanhe todos os jogos, classificacao e estatisticas do torneio.
+            7 times, 1 campeão. Acompanhe todos os jogos, classificação e estatísticas do torneio.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/classificacao" className="btn-primary flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
-              Classificacao
+              Classificação
             </Link>
             <Link href="/jogos" className="btn-outline flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -76,7 +76,7 @@ export default async function HomePage() {
         {/* Next matches */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="section-title mb-0">Proximos Jogos</h2>
+            <h2 className="section-title mb-0">Próximos Jogos</h2>
             <Link href="/jogos" className="text-sm text-gold hover:text-gold-light transition-colors">
               Ver todos
             </Link>
@@ -97,7 +97,7 @@ export default async function HomePage() {
         {/* Standings */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="section-title mb-0">Classificacao</h2>
+            <h2 className="section-title mb-0">Classificação</h2>
             <Link href="/classificacao" className="text-sm text-gold hover:text-gold-light transition-colors">
               Ver completa
             </Link>

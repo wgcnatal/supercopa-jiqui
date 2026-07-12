@@ -326,7 +326,7 @@ export function EditMatchForm({
       <div className="card p-6">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-yellow-400" />
-          Cartoes
+          Cartões
         </h2>
 
         {/* Existing cards */}

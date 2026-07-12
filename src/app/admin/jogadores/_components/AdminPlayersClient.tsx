@@ -133,7 +133,7 @@ export function AdminPlayersClient({
                     Jogador
                   </th>
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                    Posicao
+                    Posição
                   </th>
                   <th className="text-left py-3 px-4 text-gray-400 font-medium">
                     Time

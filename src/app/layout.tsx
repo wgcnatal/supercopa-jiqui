@@ -18,7 +18,7 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Supercopa Jiqui 2026",
   description:
-    "Campeonato de futebol Supercopa Jiqui 2026 - Acompanhe jogos, classificacao, estatisticas e muito mais.",
+    "Campeonato de futebol Supercopa Jiqui 2026 - Acompanhe jogos, classificação, estatísticas e muito mais.",
   keywords: ["futebol", "supercopa", "jiqui", "campeonato", "2026"],
   openGraph: {
     title: "Supercopa Jiqui 2026",

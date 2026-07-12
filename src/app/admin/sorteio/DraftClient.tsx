@@ -432,7 +432,7 @@ export default function DraftClient() {
           <div>
             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
               <Settings className="w-6 h-6 text-gold" />
-              Configuracao do Sorteio
+              Configuração do Sorteio
             </h2>
             <p className="text-gray-400 text-sm mt-1">
               Selecione as equipes participantes e seus representantes
@@ -535,7 +535,7 @@ export default function DraftClient() {
                         ))}
                     </select>
                     {!selectedPlayerId && (
-                      <p className="text-xs text-red-400 mt-1">Representante obrigatorio</p>
+                      <p className="text-xs text-red-400 mt-1">Representante obrigatório</p>
                     )}
                   </div>
                 );
@@ -561,7 +561,7 @@ export default function DraftClient() {
 
         {/* Summary */}
         <div className="card p-4">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Resumo da Configuracao</h3>
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Resumo da Configuração</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
             <div>
               <p className="text-gray-500">Equipes</p>
@@ -655,32 +655,32 @@ export default function DraftClient() {
               <ul className="space-y-1 list-disc list-inside text-gray-400">
                 <li>Existem <span className="text-white font-medium">{activePots.length} potes</span> com jogadores selecionados</li>
                 <li>Cada equipe escolhe <span className="text-white font-medium">1 jogador de cada pote</span></li>
-                <li>A escolha do pote e livre — nao ha sequencia obrigatoria</li>
-                <li>Apos escolher de um pote, o pote fica bloqueado para aquela equipe</li>
-                <li>Jogadores dos potes sao <span className="text-white font-medium">coringas</span> — sem restricao de posicao</li>
-                <li>Os representantes ja estao pre-atribuidos aos seus times</li>
+                <li>A escolha do pote é livre — não há sequência obrigatória</li>
+                <li>Após escolher de um pote, o pote fica bloqueado para aquela equipe</li>
+                <li>Jogadores dos potes são <span className="text-white font-medium">coringas</span> — sem restrição de posição</li>
+                <li>Os representantes já estão pré-atribuídos aos seus times</li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-gold mb-2">Fase 2 - Lista Geral</h4>
               <ul className="space-y-1 list-disc list-inside text-gray-400">
-                <li>Jogadores restantes separados por posicao: <span className="text-white font-medium">GOL, ZAG, LAT, MEI, ATA</span></li>
-                <li>Limite maximo por posicao por equipe:</li>
+                <li>Jogadores restantes separados por posição: <span className="text-white font-medium">GOL, ZAG, LAT, MEI, ATA</span></li>
+                <li>Limite máximo por posição por equipe:</li>
                 <li className="ml-4">Goleiro: <span className="text-white font-medium">1</span> | Zagueiro: <span className="text-white font-medium">2</span> | Lateral: <span className="text-white font-medium">2</span> | Meia: <span className="text-white font-medium">2</span> | Atacante: <span className="text-white font-medium">2</span></li>
                 <li><span className="text-white font-medium">GOL:</span> cada equipe escolhe apenas 1 goleiro, sem repetir</li>
-                <li><span className="text-white font-medium">ZAG, MEI, ATA:</span> so pode escolher o 2o depois que <span className="text-white font-medium">todas as equipes</span> ja tiverem 1</li>
-                <li><span className="text-white font-medium">LAT:</span> cada equipe pode escolher ate 2 laterais livremente</li>
-                <li>A posicao do <span className="text-white font-medium">representante</span> conta nesse calculo (se nao estiver em pote)</li>
-                <li>Jogadores dos potes sao <span className="text-white font-medium">coringas</span> e nao entram na limitacao de posicao</li>
+                <li><span className="text-white font-medium">ZAG, MEI, ATA:</span> só pode escolher o 2º depois que <span className="text-white font-medium">todas as equipes</span> já tiverem 1</li>
+                <li><span className="text-white font-medium">LAT:</span> cada equipe pode escolher até 2 laterais livremente</li>
+                <li>A posição do <span className="text-white font-medium">representante</span> conta nesse cálculo (se não estiver em pote)</li>
+                <li>Jogadores dos potes são <span className="text-white font-medium">coringas</span> e não entram na limitação de posição</li>
                 <li>Apenas jogadores com status <span className="text-emerald-400 font-medium">PAGO</span> ou <span className="text-cyan-400 font-medium">FREE</span> participam</li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-gold mb-2">Ordem do Sorteio</h4>
               <ul className="space-y-1 list-disc list-inside text-gray-400">
-                <li><span className="text-white font-medium">Rodadas impares:</span> ordem sorteada aleatoriamente com balanceamento</li>
+                <li><span className="text-white font-medium">Rodadas ímpares:</span> ordem sorteada aleatoriamente com balanceamento</li>
                 <li><span className="text-white font-medium">Rodadas pares:</span> ordem invertida automaticamente (espelho da anterior)</li>
-                <li>Quem ja foi 1o a escolher nao repete ate todos terem sido 1o</li>
+                <li>Quem já foi 1º a escolher não repete até todos terem sido 1º</li>
                 <li>Isso garante <span className="text-white font-medium">equidade</span> na ordem de escolha entre todas as equipes</li>
               </ul>
             </div>
@@ -696,7 +696,7 @@ export default function DraftClient() {
         </div>
         <div className="card p-3 text-center">
           <p className="text-2xl font-bold text-gold">{totalPicked}</p>
-          <p className="text-xs text-gray-400">Ja escolhidos</p>
+          <p className="text-xs text-gray-400">Já escolhidos</p>
         </div>
         <div className="card p-3 text-center">
           <p className="text-2xl font-bold text-emerald-400">{potRemaining}</p>
@@ -712,8 +712,8 @@ export default function DraftClient() {
       {allPlayersAssigned ? (
         <div className="card p-6 text-center border-gold/50 bg-gold/10">
           <Trophy className="w-12 h-12 text-gold mx-auto mb-3" />
-          <h3 className="text-xl font-bold text-gold">Sorteio Concluido!</h3>
-          <p className="text-gray-300 mt-1">Todos os jogadores foram distribuidos.</p>
+          <h3 className="text-xl font-bold text-gold">Sorteio Concluído!</h3>
+          <p className="text-gray-300 mt-1">Todos os jogadores foram distribuídos.</p>
         </div>
       ) : (
         <>
@@ -776,7 +776,7 @@ export default function DraftClient() {
                     </p>
                     <p className="text-gray-400 text-sm">
                       {draftState.phase === 1
-                        ? 'Escolha um jogador de qualquer pote disponivel'
+                        ? 'Escolha um jogador de qualquer pote disponível'
                         : 'Escolha um jogador da lista geral'}
                     </p>
                   </div>
@@ -810,7 +810,7 @@ export default function DraftClient() {
                         </h4>
                         {alreadyPickedFromPot && (
                           <span className="text-xs bg-primary/20 text-primary-light px-2 py-0.5 rounded flex items-center gap-1">
-                            <Lock className="w-3 h-3" /> Ja escolheu
+                            <Lock className="w-3 h-3" /> Já escolheu
                           </span>
                         )}
                         {allPicked && !alreadyPickedFromPot && (
@@ -883,8 +883,8 @@ export default function DraftClient() {
           {!draftState.needsNewOrder && draftState.isStarted && generalListPlayers.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                Lista Geral por Posicao
-                <span className="text-sm font-normal text-gray-400">({generalListPlayers.length} disponiveis)</span>
+                Lista Geral por Posição
+                <span className="text-sm font-normal text-gray-400">({generalListPlayers.length} disponíveis)</span>
               </h3>
               {(Object.keys(playersByPosition) as Position[]).map(pos => {
                 const players = playersByPosition[pos];
@@ -894,7 +894,7 @@ export default function DraftClient() {
                   <div key={pos} className="card p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-lg font-bold text-white">
-                        {POSITION_LABELS[pos]} ({pos}) - {players.length} disponiveis
+                        {POSITION_LABELS[pos]} ({pos}) - {players.length} disponíveis
                       </h3>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-400">
@@ -1025,7 +1025,7 @@ export default function DraftClient() {
 
       {/* Pick History */}
       <div className="card p-4">
-        <h3 className="text-lg font-bold text-white mb-4">Historico de Escolhas</h3>
+        <h3 className="text-lg font-bold text-white mb-4">Histórico de Escolhas</h3>
         {draftState.pickHistory.length === 0 ? (
           <p className="text-gray-500 text-sm italic">Nenhuma escolha realizada ainda.</p>
         ) : (

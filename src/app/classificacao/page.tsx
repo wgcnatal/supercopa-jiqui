@@ -5,7 +5,7 @@ import { Match, Team } from '@/lib/types';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Classificacao - Supercopa Jiqui 2026',
+  title: 'Classificação - Supercopa Jiqui 2026',
 };
 
 export default async function ClassificacaoPage() {

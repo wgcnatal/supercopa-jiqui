@@ -218,14 +218,14 @@ export default function DraftPublicView() {
       {allDone ? (
         <div className="card p-8 text-center border-gold/50 bg-gold/10">
           <Trophy className="w-16 h-16 text-gold mx-auto mb-4 animate-bounce" />
-          <h2 className="text-2xl font-bold text-gold">Sorteio Concluido!</h2>
-          <p className="text-gray-300 mt-2">Todos os jogadores foram distribuidos entre os times.</p>
+          <h2 className="text-2xl font-bold text-gold">Sorteio Concluído!</h2>
+          <p className="text-gray-300 mt-2">Todos os jogadores foram distribuídos entre os times.</p>
         </div>
       ) : !draftState.isStarted ? (
         <div className="card p-8 text-center">
           <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-400">Aguardando Inicio do Sorteio</h2>
-          <p className="text-gray-500 mt-2">O sorteio ainda nao comecou. Fique ligado!</p>
+          <h2 className="text-xl font-bold text-gray-400">Aguardando Início do Sorteio</h2>
+          <p className="text-gray-500 mt-2">O sorteio ainda não começou. Fique ligado!</p>
         </div>
       ) : (
         <>
@@ -288,7 +288,7 @@ export default function DraftPublicView() {
           {recentPicks.length > 0 && (
             <div className="card p-4">
               <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
-                Ultimas Escolhas
+                Últimas Escolhas
               </h3>
               <div className="space-y-2">
                 {recentPicks.map((pick, i) => {
@@ -323,7 +323,7 @@ export default function DraftPublicView() {
                 return (
                   <div key={pot.name} className="card p-4">
                     <h3 className="text-lg font-bold text-white mb-3">
-                      {pot.name} ({available.length} disponiveis)
+                      {pot.name} ({available.length} disponíveis)
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
                       {pot.players.map(player => {
@@ -361,7 +361,7 @@ export default function DraftPublicView() {
 
           {draftState.phase === 2 && (
             <div className="card p-4">
-              <h3 className="text-lg font-bold text-white mb-3">Lista Geral - Disponiveis</h3>
+              <h3 className="text-lg font-bold text-white mb-3">Lista Geral - Disponíveis</h3>
               <div className="space-y-3">
                 {(Object.keys(playersByPosition) as Position[]).map(pos => {
                   const players = playersByPosition[pos];
@@ -448,7 +448,7 @@ export default function DraftPublicView() {
       {/* Full Pick History */}
       {draftState.pickHistory.length > 0 && (
         <div className="card p-4">
-          <h3 className="text-lg font-bold text-white mb-3">Historico Completo</h3>
+          <h3 className="text-lg font-bold text-white mb-3">Histórico Completo</h3>
           <div className="max-h-80 overflow-y-auto scrollbar-thin space-y-1">
             {[...draftState.pickHistory].reverse().map((pick, i) => {
               const team = getTeamById(pick.teamId);

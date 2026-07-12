@@ -5,7 +5,7 @@ import { Award, AlertTriangle } from 'lucide-react';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Estatisticas - Supercopa Jiqui 2026',
+  title: 'Estatísticas - Supercopa Jiqui 2026',
 };
 
 export default async function EstatisticasPage() {
