@@ -17,6 +17,7 @@ import {
 import {
   Shuffle,
   Undo2,
+  SkipForward,
   ChevronRight,
   Trophy,
   AlertTriangle,
@@ -217,6 +218,28 @@ export default function DraftClient() {
   }
 
   const allPlayersAssigned = phase1Complete && generalListPlayers.length === 0;
+
+  // Skip current team
+  function skipTeam() {
+    setDraftState(prev => {
+      let nextTeamIndex = prev.currentTeamIndex + 1;
+      let nextRound = prev.currentRound;
+      let needsNewOrder = false;
+
+      if (nextTeamIndex >= numTeams) {
+        nextTeamIndex = 0;
+        nextRound = prev.currentRound + 1;
+        needsNewOrder = true;
+      }
+
+      return {
+        ...prev,
+        currentTeamIndex: nextTeamIndex,
+        currentRound: nextRound,
+        needsNewOrder,
+      };
+    });
+  }
 
   // Stats: eligible players
   const eligiblePlayers = allPlayers.filter(p => p.payment === 'PAGO' || p.payment === 'FREE');
@@ -606,6 +629,14 @@ export default function DraftClient() {
               Voltar Config
             </button>
           )}
+          <button
+            onClick={skipTeam}
+            disabled={!currentTeamId || draftState.needsNewOrder}
+            className="btn-outline text-sm flex items-center gap-1 text-amber-400 border-amber-400/50 hover:border-amber-400 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <SkipForward className="w-4 h-4" />
+            Pular Time
+          </button>
           <button
             onClick={undoLastPick}
             disabled={draftState.pickHistory.length === 0}
