@@ -212,10 +212,10 @@ export default function DraftClient() {
     const count = teamPositionCounts[currentTeamId]?.[pos] || 0;
     const limit = POSITION_LIMITS[pos];
     if (count >= limit) return false;
-    // LAT: livre ate o limite (sem restrição de esperar)
-    // ZAG, MEI, ATA: só pode o 2o depois que todos tiverem 1
+    // LAT e ATA: livre até o limite (sem restrição de esperar)
+    // ZAG, MEI: só pode o 2º depois que todos tiverem 1
     // GOL: limite 1, já tratado acima
-    if (pos !== 'LAT' && count > 0) {
+    if (pos !== 'LAT' && pos !== 'ATA' && count > 0) {
       const allTeamsFilled = activeTeams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
       if (!allTeamsFilled) return false;
     }
@@ -666,10 +666,10 @@ export default function DraftClient() {
               <ul className="space-y-1 list-disc list-inside text-gray-400">
                 <li>Jogadores restantes separados por posição: <span className="text-white font-medium">GOL, ZAG, LAT, MEI, ATA</span></li>
                 <li>Limite máximo por posição por equipe:</li>
-                <li className="ml-4">Goleiro: <span className="text-white font-medium">1</span> | Zagueiro: <span className="text-white font-medium">2</span> | Lateral: <span className="text-white font-medium">2</span> | Meia: <span className="text-white font-medium">2</span> | Atacante: <span className="text-white font-medium">2</span></li>
+                <li className="ml-4">Goleiro: <span className="text-white font-medium">1</span> | Zagueiro: <span className="text-white font-medium">2</span> | Lateral: <span className="text-white font-medium">2</span> | Meia: <span className="text-white font-medium">2</span> | Atacante: <span className="text-white font-medium">3</span></li>
                 <li><span className="text-white font-medium">GOL:</span> cada equipe escolhe apenas 1 goleiro, sem repetir</li>
-                <li><span className="text-white font-medium">ZAG, MEI, ATA:</span> só pode escolher o 2º depois que <span className="text-white font-medium">todas as equipes</span> já tiverem 1</li>
-                <li><span className="text-white font-medium">LAT:</span> cada equipe pode escolher até 2 laterais livremente</li>
+                <li><span className="text-white font-medium">ZAG, MEI:</span> só pode escolher o 2º depois que <span className="text-white font-medium">todas as equipes</span> já tiverem 1</li>
+                <li><span className="text-white font-medium">LAT, ATA:</span> cada equipe pode escolher livremente até o limite</li>
                 <li>A posição do <span className="text-white font-medium">representante</span> conta nesse cálculo (se não estiver em pote)</li>
                 <li>Jogadores dos potes são <span className="text-white font-medium">coringas</span> e não entram na limitação de posição</li>
                 <li>Apenas jogadores com status <span className="text-emerald-400 font-medium">PAGO</span> ou <span className="text-cyan-400 font-medium">FREE</span> participam</li>
