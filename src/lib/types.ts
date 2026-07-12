@@ -73,6 +73,23 @@ export interface Sponsor {
   created_at: string;
 }
 
+export type TradeType = 'TROCA' | 'CESSAO';
+
+export interface Trade {
+  id: string;
+  player_id: string;
+  from_team_id: string | null;
+  to_team_id: string;
+  trade_type: TradeType;
+  linked_trade_id: string | null;
+  notes: string | null;
+  created_at: string;
+  // Joined data
+  player?: Player;
+  from_team?: Team;
+  to_team?: Team;
+}
+
 export interface StandingRow {
   team: Team;
   points: number;

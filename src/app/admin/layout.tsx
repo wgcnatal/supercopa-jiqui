@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Gamepad2, Users, UserCircle, LogOut, Shuffle } from 'lucide-react';
+import { LayoutDashboard, Gamepad2, Users, UserCircle, LogOut, Shuffle, ArrowLeftRight } from 'lucide-react';
 
 export default async function AdminLayout({
   children,
@@ -72,6 +72,13 @@ export default async function AdminLayout({
         >
           <Shuffle className="w-4 h-4" />
           Sorteio
+        </Link>
+        <Link
+          href="/admin/trocas"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-light text-gray-300 hover:text-white hover:bg-surface transition-colors text-sm"
+        >
+          <ArrowLeftRight className="w-4 h-4" />
+          Trocas
         </Link>
       </nav>
 
