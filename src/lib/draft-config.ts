@@ -17,7 +17,7 @@ export const POSITION_LIMITS: Record<string, number> = {
   ZAG: 2,
   LAT: 2,
   MEI: 2,
-  ATA: 2,
+  ATA: 3,
 };
 
 export const POSITION_LABELS: Record<string, string> = {
