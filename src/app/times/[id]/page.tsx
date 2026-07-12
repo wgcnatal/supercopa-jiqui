@@ -44,7 +44,7 @@ export default async function TeamDetailPage({
       .from('matches')
       .select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*)')
       .or(`home_team_id.eq.${params.id},away_team_id.eq.${params.id}`)
-      .order('match_date', { ascending: true }),
+      .order('played_at', { ascending: true }),
   ]);
 
   if (!team) notFound();
@@ -59,7 +59,7 @@ export default async function TeamDetailPage({
   );
 
   // Stats
-  const finishedMatches = teamMatches.filter((m) => m.status === 'finished');
+  const finishedMatches = teamMatches.filter((m) => m.status === 'ENCERRADO');
   let wins = 0,
     draws = 0,
     losses = 0,

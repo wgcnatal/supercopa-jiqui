@@ -22,7 +22,7 @@ function calculateStandings(matches: Match[], teams: Team[]): StandingRow[] {
   });
 
   const groupMatches = matches.filter(
-    (m) => m.stage === 'group' && m.status === 'finished'
+    (m) => m.stage === 'GRUPO' && m.status === 'ENCERRADO'
   );
 
   groupMatches.forEach((match) => {

@@ -9,15 +9,15 @@ interface MatchCardProps {
 
 function StatusBadge({ status }: { status: string }) {
   const classes = {
-    scheduled: 'badge-scheduled',
-    live: 'badge-live',
-    finished: 'badge-finished',
+    AGENDADO: 'badge-scheduled',
+    EM_ANDAMENTO: 'badge-live',
+    ENCERRADO: 'badge-finished',
   }[status] || 'badge-scheduled';
 
   const labels: Record<string, string> = {
-    scheduled: 'Agendado',
-    live: 'Ao Vivo',
-    finished: 'Encerrado',
+    AGENDADO: 'Agendado',
+    EM_ANDAMENTO: 'Ao Vivo',
+    ENCERRADO: 'Encerrado',
   };
 
   return <span className={classes}>{labels[status] || status}</span>;
@@ -52,11 +52,11 @@ export function MatchCard({ match, homeTeam, awayTeam }: MatchCardProps) {
         <StatusBadge status={match.status} />
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Calendar className="w-3 h-3" />
-          <span>{formatDate(match.match_date)}</span>
-          {match.match_date && (
+          <span>{formatDate(match.played_at)}</span>
+          {match.played_at && (
             <>
               <Clock className="w-3 h-3 ml-1" />
-              <span>{formatTime(match.match_date)}</span>
+              <span>{formatTime(match.played_at)}</span>
             </>
           )}
         </div>
@@ -78,22 +78,22 @@ export function MatchCard({ match, homeTeam, awayTeam }: MatchCardProps) {
         <div className="flex items-center gap-2 px-4">
           <span
             className={`text-xl font-bold ${
-              match.status === 'finished' || match.status === 'live'
+              match.status === 'ENCERRADO' || match.status === 'EM_ANDAMENTO'
                 ? 'text-white'
                 : 'text-gray-600'
             }`}
           >
-            {match.status !== 'scheduled' ? match.home_score : '-'}
+            {match.status !== 'AGENDADO' ? match.home_score : '-'}
           </span>
           <span className="text-gray-600 text-sm">x</span>
           <span
             className={`text-xl font-bold ${
-              match.status === 'finished' || match.status === 'live'
+              match.status === 'ENCERRADO' || match.status === 'EM_ANDAMENTO'
                 ? 'text-white'
                 : 'text-gray-600'
             }`}
           >
-            {match.status !== 'scheduled' ? match.away_score : '-'}
+            {match.status !== 'AGENDADO' ? match.away_score : '-'}
           </span>
         </div>
 
@@ -109,10 +109,10 @@ export function MatchCard({ match, homeTeam, awayTeam }: MatchCardProps) {
         </div>
       </div>
 
-      {match.stage !== 'group' && (
+      {match.stage !== 'GRUPO' && (
         <div className="mt-2 text-center">
           <span className="text-xs text-gold font-medium">
-            {match.stage === 'semi' ? 'Semifinal' : 'Final'}
+            {match.stage === 'SEMI' ? 'Semifinal' : match.stage === 'TERCEIRO' ? '3º Lugar' : 'Final'}
           </span>
         </div>
       )}

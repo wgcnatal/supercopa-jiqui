@@ -13,7 +13,7 @@ export function AdminCreateMatch({ teams }: { teams: Team[] }) {
   const [awayTeamId, setAwayTeamId] = useState('');
   const [matchDate, setMatchDate] = useState('');
   const [round, setRound] = useState('1');
-  const [stage, setStage] = useState('group');
+  const [stage, setStage] = useState('GRUPO');
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -25,10 +25,10 @@ export function AdminCreateMatch({ teams }: { teams: Team[] }) {
     const { error } = await supabase.from('matches').insert({
       home_team_id: homeTeamId,
       away_team_id: awayTeamId,
-      match_date: matchDate || null,
-      round: stage === 'group' ? parseInt(round) : null,
+      played_at: matchDate || null,
+      round: stage === 'GRUPO' ? parseInt(round) : null,
       stage,
-      status: 'scheduled',
+      status: 'AGENDADO',
       home_score: 0,
       away_score: 0,
     });
@@ -38,7 +38,7 @@ export function AdminCreateMatch({ teams }: { teams: Team[] }) {
       setAwayTeamId('');
       setMatchDate('');
       setRound('1');
-      setStage('group');
+      setStage('GRUPO');
       setOpen(false);
       router.refresh();
     }
@@ -122,12 +122,13 @@ export function AdminCreateMatch({ teams }: { teams: Team[] }) {
                 onChange={(e) => setStage(e.target.value)}
                 className="select-field"
               >
-                <option value="group">Fase de Grupos</option>
-                <option value="semi">Semifinal</option>
-                <option value="final">Final</option>
+                <option value="GRUPO">Fase de Grupos</option>
+                <option value="SEMI">Semifinal</option>
+                <option value="FINAL">Final</option>
+                <option value="TERCEIRO">3º Lugar</option>
               </select>
             </div>
-            {stage === 'group' && (
+            {stage === 'GRUPO' && (
               <div>
                 <label className="block text-sm text-gray-300 mb-1">
                   Rodada
@@ -137,7 +138,7 @@ export function AdminCreateMatch({ teams }: { teams: Team[] }) {
                   onChange={(e) => setRound(e.target.value)}
                   className="select-field"
                 >
-                  {[1, 2, 3, 4, 5].map((r) => (
+                  {[1, 2, 3, 4, 5, 6, 7].map((r) => (
                     <option key={r} value={r}>
                       Rodada {r}
                     </option>

@@ -21,7 +21,7 @@ export default async function AdminDashboard() {
     supabase
       .from('matches')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'finished'),
+      .eq('status', 'ENCERRADO'),
   ]);
 
   const cards = [

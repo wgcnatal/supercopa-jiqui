@@ -28,12 +28,12 @@ export default async function HomePage() {
     { data: nextMatches },
   ] = await Promise.all([
     supabase.from('teams').select('*').order('name'),
-    supabase.from('matches').select('*').order('match_date', { ascending: true }),
+    supabase.from('matches').select('*').order('played_at', { ascending: true }),
     supabase
       .from('matches')
       .select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*)')
-      .in('status', ['scheduled', 'live'])
-      .order('match_date', { ascending: true })
+      .in('status', ['AGENDADO', 'EM_ANDAMENTO'])
+      .order('played_at', { ascending: true })
       .limit(4),
   ]);
 

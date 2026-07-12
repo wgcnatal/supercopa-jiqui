@@ -14,14 +14,14 @@ export default async function JogosPage() {
   const { data: matches } = await supabase
     .from('matches')
     .select('*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*)')
-    .order('match_date', { ascending: true });
+    .order('played_at', { ascending: true });
 
   const allMatches = (matches || []) as Match[];
 
   // Group by round for group stage
-  const groupMatches = allMatches.filter((m) => m.stage === 'group');
-  const semiMatches = allMatches.filter((m) => m.stage === 'semi');
-  const finalMatches = allMatches.filter((m) => m.stage === 'final');
+  const groupMatches = allMatches.filter((m) => m.stage === 'GRUPO');
+  const semiMatches = allMatches.filter((m) => m.stage === 'SEMI');
+  const finalMatches = allMatches.filter((m) => m.stage === 'FINAL' || m.stage === 'TERCEIRO');
 
   const rounds: Record<number, Match[]> = {};
   groupMatches.forEach((m) => {

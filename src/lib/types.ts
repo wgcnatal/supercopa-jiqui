@@ -1,8 +1,8 @@
 export type Position = 'GOL' | 'ZAG' | 'LAT' | 'VOL' | 'MEI' | 'ATA'; // VOL mantido para compatibilidade mas migrado para MEI
 export type PaymentStatus = 'PAGO' | 'PENDENTE' | 'FREE';
 export type CardType = 'YELLOW' | 'RED';
-export type MatchStage = 'group' | 'semi' | 'final';
-export type MatchStatus = 'scheduled' | 'live' | 'finished';
+export type MatchStage = 'GRUPO' | 'SEMI' | 'FINAL' | 'TERCEIRO';
+export type MatchStatus = 'AGENDADO' | 'EM_ANDAMENTO' | 'ENCERRADO';
 
 export interface Player {
   id: string;
@@ -33,7 +33,7 @@ export interface Match {
   away_team_id: string;
   home_score: number;
   away_score: number;
-  match_date: string | null;
+  played_at: string | null;
   round: number | null;
   stage: MatchStage;
   status: MatchStatus;

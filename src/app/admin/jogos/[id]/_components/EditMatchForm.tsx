@@ -23,8 +23,8 @@ export function EditMatchForm({
   const [awayScore, setAwayScore] = useState(match.away_score);
   const [status, setStatus] = useState(match.status);
   const [matchDate, setMatchDate] = useState(
-    match.match_date
-      ? new Date(match.match_date).toISOString().slice(0, 16)
+    match.played_at
+      ? new Date(match.played_at).toISOString().slice(0, 16)
       : ''
   );
   const [saving, setSaving] = useState(false);
@@ -59,7 +59,7 @@ export function EditMatchForm({
         home_score: homeScore,
         away_score: awayScore,
         status,
-        match_date: matchDate || null,
+        played_at: matchDate || null,
       })
       .eq('id', match.id);
     setSaving(false);
@@ -129,10 +129,12 @@ export function EditMatchForm({
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">Dados do Jogo</h2>
           <span className="text-sm text-gray-400">
-            {match.stage === 'group'
+            {match.stage === 'GRUPO'
               ? `Rodada ${match.round}`
-              : match.stage === 'semi'
+              : match.stage === 'SEMI'
               ? 'Semifinal'
+              : match.stage === 'TERCEIRO'
+              ? '3º Lugar'
               : 'Final'}
           </span>
         </div>
@@ -190,12 +192,12 @@ export function EditMatchForm({
             <label className="block text-sm text-gray-300 mb-1">Status</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as 'scheduled' | 'live' | 'finished')}
+              onChange={(e) => setStatus(e.target.value as 'AGENDADO' | 'EM_ANDAMENTO' | 'ENCERRADO')}
               className="select-field"
             >
-              <option value="scheduled">Agendado</option>
-              <option value="live">Ao Vivo</option>
-              <option value="finished">Encerrado</option>
+              <option value="AGENDADO">Agendado</option>
+              <option value="EM_ANDAMENTO">Ao Vivo</option>
+              <option value="ENCERRADO">Encerrado</option>
             </select>
           </div>
           <div>

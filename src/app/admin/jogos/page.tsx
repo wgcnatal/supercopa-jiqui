@@ -10,14 +10,14 @@ export const metadata = {
 
 function StatusBadge({ status }: { status: string }) {
   const classes: Record<string, string> = {
-    scheduled: 'badge-scheduled',
-    live: 'badge-live',
-    finished: 'badge-finished',
+    AGENDADO: 'badge-scheduled',
+    EM_ANDAMENTO: 'badge-live',
+    ENCERRADO: 'badge-finished',
   };
   const labels: Record<string, string> = {
-    scheduled: 'Agendado',
-    live: 'Ao Vivo',
-    finished: 'Encerrado',
+    AGENDADO: 'Agendado',
+    EM_ANDAMENTO: 'Ao Vivo',
+    ENCERRADO: 'Encerrado',
   };
   return (
     <span className={classes[status] || 'badge-scheduled'}>
@@ -35,7 +35,7 @@ export default async function AdminJogosPage() {
       .select(
         '*, home_team:teams!home_team_id(*), away_team:teams!away_team_id(*)'
       )
-      .order('match_date', { ascending: true }),
+      .order('played_at', { ascending: true }),
     supabase.from('teams').select('*').order('name'),
   ]);
 
@@ -101,7 +101,7 @@ export default async function AdminJogosPage() {
                       </div>
                     </td>
                     <td className="text-center py-3 px-4 text-white font-bold">
-                      {match.status !== 'scheduled'
+                      {match.status !== 'AGENDADO'
                         ? `${match.home_score} x ${match.away_score}`
                         : '- x -'}
                     </td>
@@ -121,10 +121,12 @@ export default async function AdminJogosPage() {
                       </div>
                     </td>
                     <td className="text-center py-3 px-4 text-gray-400">
-                      {match.stage === 'group'
+                      {match.stage === 'GRUPO'
                         ? `R${match.round || '-'}`
-                        : match.stage === 'semi'
+                        : match.stage === 'SEMI'
                         ? 'Semi'
+                        : match.stage === 'TERCEIRO'
+                        ? '3º Lugar'
                         : 'Final'}
                     </td>
                     <td className="text-center py-3 px-4">
