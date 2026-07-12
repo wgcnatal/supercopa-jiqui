@@ -212,13 +212,7 @@ export default function DraftClient() {
     const count = teamPositionCounts[currentTeamId]?.[pos] || 0;
     const limit = POSITION_LIMITS[pos];
     if (count >= limit) return false;
-    // LAT e ATA: livre até o limite (sem restrição de esperar)
-    // ZAG, MEI: só pode o 2º depois que todos tiverem 1
-    // GOL: limite 1, já tratado acima
-    if (pos !== 'LAT' && pos !== 'ATA' && count > 0) {
-      const allTeamsFilled = activeTeams.every(t => (teamPositionCounts[t.id]?.[pos] || 0) >= count);
-      if (!allTeamsFilled) return false;
-    }
+    // Todas as posições livres até o limite (regras de equidade desativadas para finalização)
     return true;
   }
 
